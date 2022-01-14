@@ -1,4 +1,4 @@
-# macos-fseventds
+# macos-fseventsd
 
 A simple macOS File System Events Disk Log Stream (FsEventsd) parser (and library) written in Rust!  
 FsEvent records on macOS keeps track of of file changes on a system.  This simple tool lets you parse these records to a csv and json file.
