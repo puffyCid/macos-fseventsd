@@ -1,0 +1,18 @@
+[package]
+name = "macos-fseventsd"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+description = "Library to parse macOS FsEvents"
+readme = "README.md"
+categories = ["command-line-utilities"]
+keywords = ["macos", "digital forensics", "incident response"]
+
+[dependencies]
+nom = "7.0.0"
+flate2 = "1.0.22"
+serde_json = "1.0.74"
+serde = {version="1.0.133", features = ["derive"]}
+
+[dev-dependencies]
+csv = "1.1.6"
