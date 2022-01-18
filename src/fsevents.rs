@@ -104,8 +104,8 @@ impl FsEvents {
     /// Parse FsEvent stream entry
     fn get_fsevent_data<'a>(data: &'a [u8], sig: &u32) -> nom::IResult<&'a [u8], FsEvents> {
         let mut fsevent_data = FsEvents {
-            flags: "".to_string(),
-            path: "/".to_string(),
+            flags: String::new(),
+            path: String::from("/"),
             node: 0,
             event_id: 0,
         };
