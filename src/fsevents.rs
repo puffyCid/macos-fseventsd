@@ -2,6 +2,7 @@
 //!
 //! Provides a library to decompress and parse FsEvent files.
 
+use log::warn;
 use nom::{
     bytes::streaming::take,
     number::streaming::{le_u32, le_u64},
@@ -11,7 +12,7 @@ use std::{mem::size_of, str::from_utf8};
 
 #[derive(Debug, Serialize)]
 pub struct FsEvents {
-    pub flags: String, // Flags associatd with FsEvent record
+    pub flags: String, // Flags associated with FsEvent record
     pub path: String,  // File path for FsEvent record
     pub node: u64,     // Node ID for FsEvent record
     pub event_id: u64, // Event ID for for FsEvent record
@@ -24,6 +25,9 @@ struct FsEventsHeader {
     stream_size: u32, // Size of stream of FsEvent records, includes header size
 }
 
+// FSEvents documentation:
+// https://github.com/libyal/dtformats/blob/main/documentation/MacOS%20File%20System%20Events%20Disk%20Log%20Stream%20format.asciidoc
+// http://www.osdfcon.org/presentations/2017/Ibrahim-Understanding-MacOS-File-Ststem-Events-with-FSEvents-Parser.pdf
 impl FsEvents {
     const DISKLOGGERV2: u32 = 0x444c5332;
     const DISKLOGGERV1: u32 = 0x444c5331;
@@ -41,6 +45,7 @@ impl FsEvents {
             if fsevents_header.signature != FsEvents::DISKLOGGERV1
                 && fsevents_header.signature != FsEvents::DISKLOGGERV2
             {
+                warn!("Not a FSEvent file: {:?}", data);
                 break;
             }
 
@@ -124,7 +129,12 @@ impl FsEvents {
 
         fsevent_data.flags = flag_list.join(",").to_string();
         fsevent_data.event_id = fsevent_id;
-        fsevent_data.path += from_utf8(&path.to_vec()).unwrap_or_default();
+        let path_vec = path.to_vec();
+        let path_data = from_utf8(&path_vec);
+        match path_data {
+            Ok(results) => fsevent_data.path += results,
+            Err(err) => warn!("Failed to get path string: {:?}", err),
+        }
 
         if fsevent_data.path.starts_with("//") {
             fsevent_data.path = (&fsevent_data.path[1..]).to_string();

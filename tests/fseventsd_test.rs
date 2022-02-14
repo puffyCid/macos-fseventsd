@@ -21,9 +21,6 @@ fn fseventd_local_test() {
 
         let results = macos_fseventsd::parser::parse_fsevents(&data).unwrap();
         println!("{}", results.len());
-        //for parsed in results {
-        //println!("{}", parsed.path);
-        //}
     }
 }
 
