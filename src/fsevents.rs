@@ -57,7 +57,7 @@ impl FsEvents {
                 FsEvents::get_fsevent(fsevent_data, fsevents_header.signature)?;
             total_fsevents.append(&mut fsevents);
             input = stream_input;
-            if input.len() == 0 {
+            if input.is_empty() {
                 break;
             }
         }
@@ -75,7 +75,7 @@ impl FsEvents {
             let (input_data, fsevent_results) = FsEvents::get_fsevent_data(input_results, &sig)?;
             input_results = input_data;
             fsevents_array.push(fsevent_results);
-            if input_results.len() == 0 {
+            if input_results.is_empty() {
                 break;
             }
         }
@@ -127,7 +127,7 @@ impl FsEvents {
 
         let flag_list = FsEvents::match_flags(&fsevent_flags);
 
-        fsevent_data.flags = flag_list.join(",").to_string();
+        fsevent_data.flags = flag_list.join(",");
         fsevent_data.event_id = fsevent_id;
         let path_vec = path.to_vec();
         let path_data = from_utf8(&path_vec);
@@ -154,9 +154,6 @@ impl FsEvents {
     /// Identify Event flags in FsEvent entry
     fn match_flags(flags: &u32) -> Vec<String> {
         let mut flag_list: Vec<String> = Vec::new();
-        if (flags & 0x0) != 0 {
-            flag_list.push("None".to_string());
-        }
         if (flags & 0x01) != 0 {
             flag_list.push("Created".to_string());
         }
@@ -235,7 +232,7 @@ impl FsEvents {
         if (flags & 0x20000000) != 0 {
             flag_list.push("EndOfTransaction".to_string());
         }
-        return flag_list;
+        flag_list
     }
 }
 

@@ -31,6 +31,7 @@ fn fseventd_system_filelist_test() {
 }
 
 #[test]
+#[ignore = "root privileges required"]
 fn fseventd_system_files_test() {
     let files = macos_fseventsd::parser::get_fseventsd().unwrap();
     assert!(files.len() > 3);

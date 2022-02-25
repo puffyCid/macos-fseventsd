@@ -31,7 +31,7 @@ pub fn decompress(path: &str) -> Result<Vec<u8>, std::io::Error> {
 }
 
 /// Get FsEvents data from decompressed file
-pub fn parse_fsevents(data: &Vec<u8>) -> Result<Vec<FsEvents>, Box<dyn error::Error + '_>> {
+pub fn parse_fsevents(data: &[u8]) -> Result<Vec<FsEvents>, Box<dyn error::Error + '_>> {
     let (_result, fsevents) = FsEvents::fsevents_data(data)?;
     Ok(fsevents)
 }
@@ -39,18 +39,18 @@ pub fn parse_fsevents(data: &Vec<u8>) -> Result<Vec<FsEvents>, Box<dyn error::Er
 /// Get FsEvents files at default path
 pub fn get_fseventsd() -> Result<Vec<String>, std::io::Error> {
     const CURRENT_PATH: &str = "/System/Volumes/Data/.fseventsd/";
-    return fseventsd(CURRENT_PATH);
+    fseventsd(CURRENT_PATH)
 }
 
 /// Get FsEvents files at old path
 pub fn get_fseventsd_legacy() -> Result<Vec<String>, std::io::Error> {
     const OLD_PATH: &str = "/.fseventsd";
-    return fseventsd(OLD_PATH);
+    fseventsd(OLD_PATH)
 }
 
 /// Get list of files in a directory
 pub fn fseventsd(directory: &str) -> Result<Vec<String>, std::io::Error> {
-    if !metadata(directory).is_ok() {
+    if metadata(directory).is_err() {
         return Err(Error::new(
             ErrorKind::InvalidInput,
             format!("Not a directory: {}", directory),
