@@ -4,8 +4,8 @@
 
 use log::warn;
 use nom::{
-    bytes::streaming::take,
-    number::streaming::{le_u32, le_u64},
+    bytes::complete::{take, take_while},
+    number::complete::{le_u32, le_u64},
 };
 use serde::Serialize;
 use std::{mem::size_of, str::from_utf8};
@@ -116,11 +116,11 @@ impl FsEvents {
         };
 
         // Read path until end-of-string character
-        let (input, path) = nom::bytes::streaming::take_while(|b: u8| b != 0)(data)?;
+        let (input, path) = take_while(|b: u8| b != 0)(data)?;
         // Nom end-of-string character
-        let (input, _) = nom::bytes::streaming::take(size_of::<u8>())(input)?;
-        let (input, id) = nom::bytes::streaming::take(size_of::<u64>())(input)?;
-        let (input, flags) = nom::bytes::streaming::take(size_of::<u32>())(input)?;
+        let (input, _) = take(size_of::<u8>())(input)?;
+        let (input, id) = take(size_of::<u64>())(input)?;
+        let (input, flags) = take(size_of::<u32>())(input)?;
 
         let (_, fsevent_id) = le_u64(id)?;
         let (_, fsevent_flags) = le_u32(flags)?;

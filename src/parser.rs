@@ -5,7 +5,6 @@
 use crate::fsevents::FsEvents;
 use flate2::read::MultiGzDecoder;
 use std::{
-    error,
     fs::{metadata, read_dir, File},
     io::{Error, ErrorKind, Read},
 };
@@ -31,9 +30,8 @@ pub fn decompress(path: &str) -> Result<Vec<u8>, std::io::Error> {
 }
 
 /// Get FsEvents data from decompressed file
-pub fn parse_fsevents(data: &[u8]) -> Result<Vec<FsEvents>, Box<dyn error::Error + '_>> {
-    let (_result, fsevents) = FsEvents::fsevents_data(data)?;
-    Ok(fsevents)
+pub fn parse_fsevents(data: &[u8]) -> nom::IResult<&[u8], Vec<FsEvents>> {
+    FsEvents::fsevents_data(data)
 }
 
 /// Get FsEvents files at default path
@@ -105,7 +103,7 @@ mod tests {
         test_location.push("tests/test_data/DLS2/0000000000027d79");
         let test_path: &str = &test_location.display().to_string();
         let files = decompress(test_path).unwrap();
-        let results = parse_fsevents(&files).unwrap();
+        let (_, results) = parse_fsevents(&files).unwrap();
         assert!(results.len() == 736)
     }
 
@@ -125,7 +123,7 @@ mod tests {
         test_location.push("tests/test_data/DLS1/0000000000027d7a");
         let test_path: &str = &test_location.display().to_string();
         let files = decompress(test_path).unwrap();
-        let results = parse_fsevents(&files).unwrap();
+        let (_, results) = parse_fsevents(&files).unwrap();
 
         assert!(results.len() == 2);
         assert!(results[0].path == "/.fseventsd/sl-compat");

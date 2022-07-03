@@ -14,13 +14,11 @@ fn fseventd_local_test() {
     }
 
     for fsevent in files {
-        println!("{}", fsevent);
         let data = macos_fseventsd::parser::decompress(&fsevent).unwrap();
         assert!(data.len() > 10);
-        println!("file len: {}", data.len());
 
-        let results = macos_fseventsd::parser::parse_fsevents(&data).unwrap();
-        println!("{}", results.len());
+        let (_, results) = macos_fseventsd::parser::parse_fsevents(&data).unwrap();
+        assert!(results.len() > 100);
     }
 }
 
@@ -37,15 +35,10 @@ fn fseventd_system_files_test() {
     assert!(files.len() > 3);
 
     for fsevent in files {
-        //println!("{}", fsevent);
         let data = macos_fseventsd::parser::decompress(&fsevent).unwrap();
         assert!(data.len() > 10);
-        //println!("file len: {}", data.len());
 
-        let results = macos_fseventsd::parser::parse_fsevents(&data).unwrap();
-        println!("{}", results.len());
-        for parsed in results {
-            println!("{}", parsed.path);
-        }
+        let (_, results) = macos_fseventsd::parser::parse_fsevents(&data).unwrap();
+        assert!(results.len() > 100);
     }
 }

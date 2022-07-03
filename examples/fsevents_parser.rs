@@ -54,7 +54,7 @@ fn parse_data(files: &Vec<String>) -> Result<(), Box<dyn Error>> {
             Ok(results) => {
                 let fsevents_data_results = macos_fseventsd::parser::parse_fsevents(&results);
                 match fsevents_data_results {
-                    Ok(mut data_results) => {
+                    Ok((_, mut data_results)) => {
                         for parsed in &data_results {
                             writer.write_record(&[
                                 &parsed.path,
