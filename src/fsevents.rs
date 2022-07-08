@@ -110,7 +110,7 @@ impl FsEvents {
     fn get_fsevent_data<'a>(data: &'a [u8], sig: &u32) -> nom::IResult<&'a [u8], FsEvents> {
         let mut fsevent_data = FsEvents {
             flags: String::new(),
-            path: String::from("/"),
+            path: String::from("/"), // Ensure every path has root slash
             node: 0,
             event_id: 0,
         };
@@ -136,6 +136,7 @@ impl FsEvents {
             Err(err) => warn!("Failed to get path string: {:?}", err),
         }
 
+        // Strip any paths that have duplicative root slashes
         if fsevent_data.path.starts_with("//") {
             fsevent_data.path = (&fsevent_data.path[1..]).to_string();
         }
