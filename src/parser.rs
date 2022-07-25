@@ -4,6 +4,7 @@
 
 use crate::fsevents::FsEvents;
 use flate2::read::MultiGzDecoder;
+use log::error;
 use std::{
     fs::{metadata, read_dir, File},
     io::{Error, ErrorKind, Read},
@@ -69,15 +70,42 @@ pub fn fseventsd(directory: &str) -> Result<Vec<String>, std::io::Error> {
     Ok(files)
 }
 
+pub fn parse_fseventsd_data(legacy: bool) -> Result<Vec<FsEvents>, std::io::Error> {
+    let fsevents_files = if !legacy {
+        get_fseventsd()?
+    } else {
+        get_fseventsd_legacy()?
+    };
+
+    let mut fsevents_data: Vec<FsEvents> = Vec::new();
+    for file in fsevents_files {
+        let decompress_data = decompress(&file)?;
+        let results = parse_fsevents(&decompress_data);
+        match results {
+            Ok((_, mut data)) => fsevents_data.append(&mut data),
+            Err(err) => error!("Failed to parse FsEvent file {}, err: {:?}", file, err),
+        }
+    }
+    Ok(fsevents_data)
+}
+
 #[cfg(test)]
 mod tests {
     use crate::parser::{decompress, fseventsd, get_fseventsd, parse_fsevents};
     use std::path::PathBuf;
 
+    use super::parse_fseventsd_data;
+
     #[test]
     fn test_get_fseventsd() {
         let files = get_fseventsd().unwrap();
         assert!(files.len() > 3);
+    }
+
+    #[test]
+    fn test_parse_fseventsd_data() {
+        let results = parse_fseventsd_data(false).unwrap();
+        assert!(results.len() > 100);
     }
 
     #[test]
