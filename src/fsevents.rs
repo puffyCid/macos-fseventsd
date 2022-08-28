@@ -33,7 +33,7 @@ impl FsEvents {
     const DISKLOGGERV1: u32 = 0x444c5331;
 
     /// Parse provided FsEvent data
-    pub fn fsevents_data(data: &[u8]) -> nom::IResult<&[u8], Vec<FsEvents>> {
+    pub(crate) fn fsevents_data(data: &[u8]) -> nom::IResult<&[u8], Vec<FsEvents>> {
         let mut total_fsevents: Vec<FsEvents> = Vec::new();
         let mut input = data;
 
@@ -239,7 +239,7 @@ impl FsEvents {
 
 #[cfg(test)]
 mod tests {
-    use std::{fs::File, io::Read, path::PathBuf};
+    use std::{fs, path::PathBuf};
 
     use crate::parser::decompress;
 
@@ -269,9 +269,7 @@ mod tests {
     fn test_fsevents_headers() {
         let mut test_location = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
         test_location.push("tests/test_data/Headers/dls2header");
-        let mut open = File::open(test_location).unwrap();
-        let mut buffer = Vec::new();
-        open.read_to_end(&mut buffer).unwrap();
+        let buffer = fs::read(test_location).unwrap();
         let (_, header) = FsEvents::fsevents_header(&buffer).unwrap();
         assert!(header.signature == 1145852722);
         assert!(header.padding == 779163104);
@@ -282,9 +280,7 @@ mod tests {
     fn test_get_fsevent_data() {
         let mut test_location = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
         test_location.push("tests/test_data/Uncompressed/0000000000027d79");
-        let mut open = File::open(test_location).unwrap();
-        let mut buffer = Vec::new();
-        open.read_to_end(&mut buffer).unwrap();
+        let buffer = fs::read(test_location).unwrap();
         let (input, header) = FsEvents::fsevents_header(&buffer).unwrap();
 
         let (_, results) = FsEvents::get_fsevent_data(input, &header.signature).unwrap();
@@ -299,9 +295,7 @@ mod tests {
     fn test_get_fsevent() {
         let mut test_location = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
         test_location.push("tests/test_data/Uncompressed/0000000000027d79");
-        let mut open = File::open(test_location).unwrap();
-        let mut buffer = Vec::new();
-        open.read_to_end(&mut buffer).unwrap();
+        let buffer = fs::read(test_location).unwrap();
         let (input, header) = FsEvents::fsevents_header(&buffer).unwrap();
 
         let (input, results) = FsEvents::get_fsevent(input, header.signature).unwrap();

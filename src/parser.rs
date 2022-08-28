@@ -2,26 +2,24 @@
 //!
 //! Provides a library to decompress and parse FsEvent files.
 
-use crate::fsevents::FsEvents;
+use crate::{fsevents::FsEvents, size::get_file_size};
 use flate2::read::MultiGzDecoder;
 use log::error;
 use std::{
-    fs::{metadata, read_dir, File},
+    fs::{self, metadata, read_dir},
     io::{Error, ErrorKind, Read},
+    path::Path,
 };
 
 /// Decompress gzip compressed files
 pub fn decompress(path: &str) -> Result<Vec<u8>, std::io::Error> {
-    let mut open = File::open(path)?;
-    let meta = open.metadata()?;
-    if !meta.is_file() {
+    if !Path::new(path).is_file() && get_file_size(path) {
         return Err(Error::new(
             ErrorKind::InvalidInput,
             format!("Not a file: {}", path),
         ));
     }
-    let mut buffer = Vec::new();
-    open.read_to_end(&mut buffer)?;
+    let buffer = fs::read(path)?;
     let mut data = MultiGzDecoder::new(&buffer[..]);
 
     let mut decompress_data = Vec::new();
@@ -136,7 +134,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic]
+    #[should_panic(expected = "Eof")]
     fn test_malformed() {
         let mut test_location = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
         test_location.push("tests/test_data/Malformed/malformed");

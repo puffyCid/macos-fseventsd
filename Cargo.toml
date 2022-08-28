@@ -9,11 +9,11 @@ categories = ["command-line-utilities"]
 keywords = ["macos", "digital forensics", "incident response"]
 
 [dependencies]
-nom = "7.1.0"
-flate2 = "1.0.22"
-serde_json = "1.0.79"
-serde = {version="1.0.136", features = ["derive"]}
-log = "0.4.14"
+nom = "7.1.1"
+flate2 = "1.0.24"
+serde_json = "1.0.85"
+serde = {version="1.0.144", features = ["derive"]}
+log = "0.4.17"
 
 [dev-dependencies]
 csv = "1.1.6"
